@@ -1,0 +1,74 @@
+import os
+import time
+from zipfile import ZipFile
+import json
+
+lab_name = "lab1"
+
+
+pdir = os.getcwd()
+print(pdir)
+try:
+	os.mkdir(lab_name+"_unzip")
+except:
+	pass
+
+os.chdir(lab_name)
+mdir = os.getcwd()
+
+lst = list([x[0] for x in os.walk(".")])
+
+data={}
+nameDefaulter={}
+
+cnt=0
+for i in lst:
+
+	# os.chdir(i)
+	if(i=='.'):
+		continue
+
+	user={}
+
+	# print(os.getcwd(), i)
+	os.chdir(i)
+	content = os.listdir()
+
+	name = i[2:].split("_")[0]
+	user["Name"]=name
+
+
+	for file in content:
+		if(file[-4:]==".zip"):
+			user["zipName"]=file
+			rollno=file[:-4]
+			print(rollno)
+			if(not rollno.isnumeric()):
+				nameDefaulter[i]=file
+				continue
+
+
+			with ZipFile(file, 'r') as zipObj:
+				list_file = zipObj.namelist()
+				list_file.sort()
+				user["zipContent"]=list_file	
+				zipObj.extractall(pdir+"/"+lab_name+"_unzip")
+				#print(pdir+"/"+lab_name+"_unzip/")			
+			
+			data[cnt]=user
+			cnt+=1
+	# print(data)
+
+
+	# print("=")
+	# print(os.getcwd())
+	# print("=$")
+	os.chdir(mdir)
+	
+os.chdir(pdir)
+with open(lab_name+"_response.json", "w") as outfile:
+    json.dump(data, outfile)
+
+
+with open(lab_name+"_name_defaulter.json", "w") as outfile:
+    json.dump(nameDefaulter, outfile)
