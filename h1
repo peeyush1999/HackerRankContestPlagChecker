@@ -1,0 +1,138 @@
+import os
+import time
+from zipfile import ZipFile
+import json
+import sys
+
+
+def cmpfile(path1, path2):
+	file1 = open(path1,'r')
+	file2 = open(path2,'r')
+
+	file1_lines = file1.readlines()
+	file2_lines = file2.readlines()
+
+	print(file1_lines, file2_lines)
+
+	for i in range(len(file1_lines)):
+	    if file1_lines[i] != file2_lines[i]:
+	        # print("Line " + str(i+1) + " doesn't match.")
+	        # print("------------------------")
+	        # print("File1: " + file1_lines[i])
+	        # print("File2: " + file2_lines[i])
+	        return 0
+
+	file1.close()
+	file2.close()
+	return 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+if(len(sys.argv)<2):
+	print("CMD Arg. Missing !!!")
+	exit(0)
+lab_name = sys.argv[1]#"lab2"
+
+
+pdir = os.getcwd()
+print(pdir)
+
+
+os.chdir(pdir+"/"+lab_name+"_unzip/")
+mdir = os.getcwd()
+
+# print(mdir)
+questions=["q1.sh","q2.sh"]
+
+for qnum in questions:
+	try:
+		os.mkdir(pdir+"/lab2"+qnum[1])
+	except:
+		print("Directory already exists!!!\n")
+
+lst = list([x for x in os.listdir() if "__MACOSX" not in x])
+
+# print(lst)
+
+# print(os.listdir(mdir+"/"+lst[0]))
+# exit(0)
+
+data={}
+nameDefaulter={}
+
+
+
+cnt=0
+# print(lst)
+# exit(0)
+for i in lst:
+	# print(i,os.listdir(mdir+"/"+i))
+	try:
+		content = os.listdir(mdir+"/"+i)
+	except:
+		continue
+		
+	# print(content)
+	user={}
+	user["name"]=i
+
+	for qnum in questions:
+		
+		print(i,qnum)
+		# print("=====================================================")
+		# print("=====================================================")
+		if("q1.sh" == qnum):
+			cmd = "bash "+mdir+"/"+i+"/"+qnum+" "+pdir+"/lab2input.txt > "+pdir+"/lab2"+qnum[1]+"/"+i+"_"+qnum[:-3]
+			cmd_print = "bash "+mdir+"/"+i+"/"+qnum+" "+pdir+"/lab2input.txt"# > "+pdir+"/lab2"+qnum[1]+"/"+i+"_"+qnum[:-3]
+			# print(cmd)
+			os.system(cmd)
+			os.system(cmd_print)
+
+			print("Cmp file Returns :",cmpfile(pdir+"/lab2"+qnum[1]+"/"+i+"_"+qnum[:-3], pdir+"/lab2output1") )
+
+			if(cmpfile(pdir+"/lab2"+qnum[1]+"/"+i+"_"+qnum[:-3], pdir+"/lab2output1")):
+				user["q1"]=10
+			else:
+				user["q1"]=0
+
+		print("=====================================================")
+		if("q2.sh" == qnum):
+			cmd = "bash "+mdir+"/"+i+"/"+qnum+" > "+pdir+"/lab2"+qnum[1]+"/"+i+"_"+qnum[:-3]
+			cmd_print = "bash "+mdir+"/"+i+"/"+qnum
+			# print("$",cmd)
+			os.system(cmd)
+			os.system(cmd_print)
+
+			if(cmpfile(pdir+"/lab2"+qnum[1]+"/"+i+"_"+qnum[:-3],pdir+"/lab2output2")):
+				user["q2"]=10
+			else:
+				user["q2"]=0
+
+		print("=====================================================")
+		print("=====================================================")
+	
+	data[cnt]=user
+	
+	cnt+=1
+
+	# if(cnt>10):
+	# 	break
+
+
+for i in data:
+	print(data[i])
+
+
+os.chdir(pdir)
+with open(lab_name+"_eval.json", "w") as outfile:
+    json.dump(data, outfile)
